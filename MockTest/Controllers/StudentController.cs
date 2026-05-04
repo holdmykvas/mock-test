@@ -52,4 +52,25 @@ public class StudentController : ControllerBase
         }
     }
 
+    [Route("{borrowingId}/return")]
+    [HttpPut]
+    public async Task<IActionResult> ReturnBorrowing(int borrowingId)
+    {
+        try
+        {
+            await _dbService.ReturnBorrowingAsync(borrowingId);
+            
+            // 200 OK or 204 No Content are both standard for successful PUT requests
+            return Ok($"Borrowing {borrowingId} successfully returned."); 
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(ex.Message); // Returns 404
+        }
+        catch (BadRequestException ex)
+        {
+            return BadRequest(ex.Message); // Returns 400
+        }
+    }
+    
 }

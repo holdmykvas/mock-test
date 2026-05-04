@@ -96,7 +96,7 @@ public class DbService : IDbService
                                    """;
 
         var CreateBorrowingBookQuery = """
-                                        INSERT INTO BorrowingBook
+                                        INSERT INTO Borrowing_Book
                                        VALUES (@BorrowId, @BookId)
                                        """;
 
@@ -172,6 +172,43 @@ public class DbService : IDbService
         {
             await transaction.RollbackAsync();
             throw;
+        }
+    }
+    
+    public async Task ReturnBorrowingAsync(int borrowingId)
+    {
+        var checkStatusQuery = "SELECT ReturnDate FROM Borrowing WHERE Id = @BorrowingId";
+        
+        var updateQuery = "UPDATE Borrowing SET ReturnDate = @ReturnDate WHERE Id = @BorrowingId";
+
+        await using var connection = new SqlConnection(_connectionString);
+        await connection.OpenAsync();
+        
+        await using var checkCommand = new SqlCommand(checkStatusQuery, connection);
+        checkCommand.Parameters.AddWithValue("@BorrowingId", borrowingId);
+        
+        var returnDateResult = await checkCommand.ExecuteScalarAsync();
+
+        if (returnDateResult == null)
+        {
+            throw new NotFoundException($"Borrowing with ID {borrowingId} not found.");
+        }
+        
+        if (returnDateResult != DBNull.Value)
+        {
+            throw new BadRequestException($"Borrowing with ID {borrowingId} has already been returned.");
+        }
+        
+        await using var updateCommand = new SqlCommand(updateQuery, connection);
+        
+        updateCommand.Parameters.AddWithValue("@ReturnDate", DateTime.Now); 
+        updateCommand.Parameters.AddWithValue("@BorrowingId", borrowingId);
+        
+        var rowsAffected = await updateCommand.ExecuteNonQueryAsync();
+        
+        if (rowsAffected == 0)
+        {
+            throw new Exception("Failed to update the borrowing record.");
         }
     }
 }
