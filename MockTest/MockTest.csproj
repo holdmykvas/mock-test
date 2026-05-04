@@ -12,12 +12,5 @@
         <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="9.0.12" />
         <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="10.1.7" />
     </ItemGroup>
-
-    <ItemGroup>
-        <Folder Include="Controllers\" />
-        <Folder Include="DTOs\" />
-        <Folder Include="Exceptions\" />
-        <Folder Include="Services\" />
-    </ItemGroup>
     
 </Project>
