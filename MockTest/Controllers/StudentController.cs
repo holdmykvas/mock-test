@@ -7,7 +7,7 @@ namespace MockTest.Controllers;
 
 [Route("api/students")]
 [ApiController]
-public class StudentController
+public class StudentController : ControllerBase
 {
     private readonly IDbService _dbService;
     public StudentController(IDbService dbService)

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Connections.Features;
 using Microsoft.Data.SqlClient;
 using MockTest.DTOs;
+using MockTest.Exceptions;
 
 namespace MockTest.Services;
 
@@ -13,6 +14,7 @@ public class DbService : IDbService
     {
         _connectionString = configuration.GetConnectionString("DefaultConnection") ?? string.Empty;
     }
+    //GET
     public async Task<GetStudentDetailsDto> GetStudentDetailsAsync(int studentId)
     {
         var query = """
@@ -35,7 +37,7 @@ public class DbService : IDbService
         await connection.OpenAsync();
 
         await using var command = new SqlCommand(query, connection);
-        command.Parameters.AddWithValue("StudentId", studentId);
+        command.Parameters.AddWithValue("@StudentId", studentId);
 
         await using var reader = await command.ExecuteReaderAsync();
 
@@ -82,6 +84,6 @@ public class DbService : IDbService
                 Author = reader.GetString(ordBookAuthor)
             });
         }
-        return results ?? throw new Exception("No results found for this id");
+        return results ?? throw new NotFoundException($"Student with ID {studentId} not found.");
     }
 }
