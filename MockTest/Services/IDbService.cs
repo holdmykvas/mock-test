@@ -9,4 +9,6 @@ public interface IDbService
     Task CreateBorrowingAsync(int studentId, CreateBorrowingBooksDto createBorrowingBooksDto);
 
     Task ReturnBorrowingAsync(int borrowingId);
+    
+    Task DeleteBorrowingAsync(int borrowingId);
 }

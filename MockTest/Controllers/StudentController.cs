@@ -16,18 +16,20 @@ public class StudentController : ControllerBase
     {
         _dbService = dbService;
     }
-
+    //Route: GET api/students/{id}/borrowings
     [Route("{id}/borrowings")]
     [HttpGet]
     public async Task<IActionResult> GetStudentBorrowing(int id)
     {
         try
         {
+            //asking service for data
             var result = await _dbService.GetStudentDetailsAsync(id);
             return Ok(result);
         }
         catch (NotFoundException ex)
         {
+            //giving 404 instead of default exception
             return NotFound(ex.Message);
         }
     }
@@ -36,6 +38,7 @@ public class StudentController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Post([FromRoute] int id, [FromBody] CreateBorrowingBooksDto dto)
     {
+        // Before bother the database, check if the user sent a valid request.
         if (!dto.Books.Any())
         {
             return BadRequest("At least 1 item is required");
@@ -43,11 +46,13 @@ public class StudentController : ControllerBase
 
         try
         {
+            //POST - 201 (CREATED)
             await _dbService.CreateBorrowingAsync(id, dto);
             return Created($"api/students/{id}/borrowings", dto);
         }
         catch (NotFoundException ex)
         {
+            //Student or Book don't exist
             return NotFound(ex.Message);
         }
     }
@@ -65,11 +70,32 @@ public class StudentController : ControllerBase
         }
         catch (NotFoundException ex)
         {
+            //If borrowing doesn't exist
             return NotFound(ex.Message); // Returns 404
         }
         catch (BadRequestException ex)
         {
+            //The borrowing was already returned
             return BadRequest(ex.Message); // Returns 400
+        }
+    }
+    
+// This overrides the controller's base route ("api/students") because borrowings are an independent resource here
+    [Route("/api/borrowings/{borrowingId}")]
+    [HttpDelete]
+    public async Task<IActionResult> DeleteBorrowing(int borrowingId)
+    {
+        try
+        {
+            await _dbService.DeleteBorrowingAsync(borrowingId);
+            
+            // Translates to 204 (No Content)
+            return NoContent(); 
+        }
+        catch (NotFoundException ex)
+        {
+            //No borrowing found 
+            return NotFound(ex.Message);
         }
     }
     
